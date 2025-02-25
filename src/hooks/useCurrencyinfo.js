@@ -1,13 +1,28 @@
-import {useEffect, useState} from 'react'
+import { useEffect, useState } from "react";
 
-function useCurrencyinfo(currency) {
-    const [data, setdata] = useState({})
+function useCurrencyInfo(currency) {
+    const [data, setData] = useState({});
+    const apiKey = import.meta.env.VITE_CURRENCY_API_KEY; // Load API key
+
     useEffect(() => {
-        fetch(`https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/${currency}.json`).then((res)=>res.json()).
-        then((res)=> setdata(res[currency]))
-    
-    }, [currency])
-    return data
-    
+        if (!apiKey) {
+            console.error("API Key is missing! Check your .env file.");
+            return;
+        }
+
+        fetch(`https://api.freecurrencyapi.com/v1/latest?apikey=${apiKey}`)
+            .then((res) => res.json())
+            .then((res) => {
+                if (res.data) {
+                    setData(res.data);  // Store full currency data
+                } else {
+                    console.error("Currency data not found:", res);
+                }
+            })
+            .catch((error) => console.error("Error fetching currency data:", error));
+    }, [currency]);
+
+    return data;  // Return full object instead of a single currency value
 }
-export default useCurrencyinfo;
+
+export default useCurrencyInfo;
